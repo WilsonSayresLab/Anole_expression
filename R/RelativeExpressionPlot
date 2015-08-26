@@ -26,7 +26,9 @@ GL343417.1	9.4
 	locuslgb<-as.numeric(as.character(lgb$ac_chrx_start))
 	locusscaf<-as.numeric(as.character(scaffolds$ac_chrx_start))
 
+#------------------
 #3. Plot scaffold points in green, LGb points as blue diamonds, scaffold median in green, LGb median in blue, and autosomal median as a dotted red line. Plot the sliding window median values in black:
+#------------------
 
 plot(locusscaf, scaffolds$rel.exp, pch=20, col='green4', main="Proposed X-Chromosome", xlab="Position on Propsoed Anole X Chromosome (Mb)", ylab="Relative Expression (M/F)", ylim=c(0,2))
 	points(locuslgb, lgb$rel.exp, pch=18,col='blue3')
