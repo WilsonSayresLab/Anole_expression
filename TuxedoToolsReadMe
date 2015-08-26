@@ -1,0 +1,441 @@
+###############################################################
+#-------------- OverView ----------------
+#
+# Codes/programs needed to run this pipeline
+#
+#---Publicly available programs-------------------------
+#
+#		sra toolkit 		http://www.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?view=toolkit_doc&f=std#header-global
+#		samtools/htslib		https://github.com/samtools/htslib
+#		bowtie 				http://bowtie-bio.sourceforge.net/index.shtml	
+#		tophat				http://tophat.cbcb.umd.edu/
+#		cufflinks			http://cufflinks.cbcb.umd.edu/
+#		
+#############################################################
+
+######## TuxedoTools README #######
+
+#--------------------------
+# 1. Prepare directories and files 
+#--------------------------
+
+#Create a directory to store all of the executable programs used in this protocol 
+mkdir $HOME/bin
+mkdir $HOME/Anole_Expression 
+mkdir $HOME/Anole_Expression/SRA_files
+mkdir $HOME/Anole_Expression/Genome
+mkdir $HOME/Anole_Expression/tophat
+mkdir $HOME/Anole_Expression/clout
+mkdir $HOME/Anole_Expression/Output_Data
+mkdir $HOME/Anole_Expression/Output_Data/MF_Data
+mkdir $HOME/Anole_Expression/tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.1
+
+#Add the above directory to your PATH environment variable
+export PATH=$HOME/bin:$PATH
+
+#--------------------------
+# 2. program check
+#--------------------------
+
+# Make sure each of these programs is loaded on the server
+#
+#		samtools/htslib		https://github.com/samtools/htslib
+#		bowtie 				http://bowtie-bio.sourceforge.net/index.shtml	
+#		tophat				http://tophat.cbcb.umd.edu/
+#		cufflinks			http://cufflinks.cbcb.umd.edu/
+#
+#	*make sure program paths are exported to your working directory*  
+#
+#		export PATH=$PATH:/opt/tophat-2.0.14.Linux_x86_64/tophat2
+#		export PATH=$PATH:/opt/tophat-2.0.14.Linux_x86_64/samtools_0.1.18
+#		export PATH=$PATH:/opt/bowtie2-2.2.4/bowtie2-inspect
+#		export PATH=$PATH:/opt/bowtie2-2.2.4/bowtie2
+#		export PATH=$PATH:/opt/bowtie2-2.2.4/bowtie2-build
+#		export PATH=$PATH:/opt/bowtie2-2.2.4/bowtie2-align
+#		export PATH=$PATH:/opt/cufflinks-2.2.1.Linux_x86_64/gtf_to_sam
+#		export PATH=$PATH:/opt/cufflinks-2.2.1.Linux_x86_64/cufflinks
+#		export PATH=$PATH:/opt/cufflinks-2.2.1.Linux_x86_64/cuffcompare
+#		export PATH=$PATH:/opt/cufflinks-2.2.1.Linux_x86_64/cuffmerge
+
+
+module load sratoolkit/2.5.2
+module load samtools/1.2
+module load bowtie2/2.2.4
+module load tophat/2.0.14
+module load cufflinks/2.2.1 
+
+#--------------------------
+# 3. Download sra files  TIMING ~ 2 Days
+#--------------------------
+
+# sra toolkit must be in your path 
+# these are large files and will take awhile to download 
+fastq-dump SRR1502184
+fastq-dump SRR1502185
+fastq-dump SRR1502186
+fastq-dump SRR1502187
+fastq-dump SRR1502188
+
+*** Need to explain where they can get these files from: *** Other Downloads ***
+ASU_Acar_v2.2.1.gtf
+
+#--------------------------
+# 4. Separate sra files into pair-ed fastq files 
+#--------------------------
+
+fastq-dump --split-3 SRA_files/SRR1502184.sra
+fastq-dump --split-3 SRA_files/SRR1502185.sra
+fastq-dump --split-3 SRA_files/SRR1502186.sra
+fastq-dump --split-3 SRA_files/SRR1502187.sra
+fastq-dump --split-3 SRA_files/SRR1502188.sra
+
+#--------------------------
+# 5. Create Bowtie index (Either move index to tophat program folder or specify it as an output location) TIMING ~ 30 minutes
+#--------------------------
+
+bowtie2-build -f Genome/Anolis_carolinensis.AnoCar2.0.dna_rm.toplevel.fa  anoCar_index
+bowtie2_seq -i /Applications/TopHat/tophat-2.0.13.OSX_x86_64/indexes/ 
+
+#--------------------------
+# 6. Align the RNA-seq reads to the genome TIMING ~ 2 days
+#--------------------------
+
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d15s1/SRR1502164_1.fastq,/FASTQ_Dump/Tail/d15s1/SRR1502164_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d15s2/SRR1502165_1.fastq,/FASTQ_Dump/Tail/d15s2/SRR1502165_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d15s3/SRR1502166_1.fastq,/FASTQ_Dump/Tail/d15s3/SRR1502166_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d15s4/SRR1502167_1.fastq,/FASTQ_Dump/Tail/d15s4/SRR1502167_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d15s5/SRR1502168_1.fastq,/FASTQ_Dump/Tail/d15s5/SRR1502168_2.fastq
+
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d26s1/SRR1502169_1.fastq,/FASTQ_Dump/Tail/d26s1/SRR1502169_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d26s2/SRR1502170_1.fastq,/FASTQ_Dump/Tail/d26s2/SRR1502170_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d26s3/SRR1502171_1.fastq,/FASTQ_Dump/Tail/d26s3/SRR1502171_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d26s4/SRR1502172_1.fastq,/FASTQ_Dump/Tail/d26s4/SRR1502172_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d26s5/SRR1502173_1.fastq,/FASTQ_Dump/Tail/d26s5/SRR1502173_2.fastq
+
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d47s1/SRR1502174_1.fastq,/FASTQ_Dump/Tail/d47s1/SRR150174_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d47s2/SRR1502175_1.fastq,/FASTQ_Dump/Tail/d47s2/SRR150175_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d47s3/SRR1502176_1.fastq,/FASTQ_Dump/Tail/d47s3/SRR150176_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d47s4/SRR1502178_1.fastq,/FASTQ_Dump/Tail/d47s4/SRR150177_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d47s5/SRR1502179_1.fastq,/FASTQ_Dump/Tail/d47s5/SRR150178_2.fastq
+
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d61s1/SRR1502179_1.fastq,/FASTQ_Dump/Tail/d61s1/SRR150179_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d61s2/SRR1502180_1.fastq,/FASTQ_Dump/Tail/d61s2/SRR150180_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d61s3/SRR1502181_1.fastq,/FASTQ_Dump/Tail/d61s3/SRR150181_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d61s4/SRR1502182_1.fastq,/FASTQ_Dump/Tail/d61s4/SRR150182_2.fastq
+tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf -o /tophat/tail1 anoCar_index /FASTQ_Dump/Tail/d61s5/SRR1502183_1.fastq,/FASTQ_Dump/Tail/d61s5/SRR150183_2.fastq
+
+#--------------------------
+# 7. Assemble expressed genes and transcripts for each sample TIMING ~ 1 day 
+#--------------------------
+
+*** Where did the clout files come from? example:A081S1_clout
+
+cufflinks -o clout/D015S1_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.1/accepted_hits.bam
+cufflinks -o clout/D015S2_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.2/accepted_hits.bam
+cufflinks -o clout/D015S3_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.3/accepted_hits.bam
+cufflinks -o clout/D015S4_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.4/accepted_hits.bam
+cufflinks -o clout/D015S5_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.5/accepted_hits.bam
+
+cufflinks -o clout/D026S1_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.1/accepted_hits.bam
+cufflinks -o clout/D026S2_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.2/accepted_hits.bam
+cufflinks -o clout/D026S3_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.3/accepted_hits.bam
+cufflinks -o clout/D026S4_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.4/accepted_hits.bam
+cufflinks -o clout/D026S5_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.5/accepted_hits.bam
+
+cufflinks -o clout/D047S1_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.1/accepted_hits.bam
+cufflinks -o clout/D047S2_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.2/accepted_hits.bam
+cufflinks -o clout/D047S3_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.3/accepted_hits.bam
+cufflinks -o clout/D047S4_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.4/accepted_hits.bam
+cufflinks -o clout/D047S5_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.5/accepted_hits.bam
+
+cufflinks -o clout/D061S1_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.1/accepted_hits.bam
+cufflinks -o clout/D061S2_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.2/accepted_hits.bam
+cufflinks -o clout/D061S3_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.3/accepted_hits.bam
+cufflinks -o clout/D061S4_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.4/accepted_hits.bam
+cufflinks -o clout/D061S5_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.5/accepted_hits.bam
+
+#--------------------------
+# 8. Create a single transcriptome annotatione TIMING ~ unknown 
+#--------------------------
+ 
+#Create "assemblies.txt" file that lists the location of the transcripts.gtf file for each sample from the cufflinks output:
+
+#	/Anole_Expression/clout/D015S1_clout/transcripts.gtf
+
+cuffmerge  -g Genome/ASU_Acar_v2.2.1.gtf -s Genome/Anolis_carolinensis.AnoCar2.0.dna_rm.toplevel.fa assemblies.txt
+
+
+#--------------------------
+# 9. Identify differentially expressed genes and transcripts TIMING ~ 12 days
+#--------------------------
+
+# Run cuffdiff using the ASU annotation instead of merged.gtf *** Please explain 
+
+# Comparison between all four individuals 
+./cuffdiff -o diffout -b Genome/Anolis_carolinensis.AnoCar2.0.dna_rm.toplevel.fa -p 6 -L d15,d26,d47,d61 -u Genome/ASU_Acar_v2.2.1.gtf tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.1/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.2/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.3/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.4/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.5/accepted_hits.bam tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.1/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.2/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.3/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.4/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.5/accepted_hits.bam tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.1/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.2/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.3/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.4/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.5/accepted_hits.bam tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.1/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.2/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.3/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.4/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.5/accepted_hits.bam
+
+# Comparison between males and females only 
+./cuffdiff -o Cuffdiff_out/mf_diffout -b Genome/Anolis_carolinensis.AnoCar2.0.dna_rm.toplevel.fa -p 6 -L male,female -u Genome/ASU_Acar_v2.2.1.gtf tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.1/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.2/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.3/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.4/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.5/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.1/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.2/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.3/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.4/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.5/accepted_hits.bam tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.1/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.2/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.3/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.4/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.5/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.1/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.2/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.3/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.4/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.5/accepted_hits.bam
+
+# All tissues
+./cuffdiff -use-sample-sheet -o Cuffdiff_out/mf_all -b Genome/Anolis_carolinensis.AnoCar2.0.dna_rm.toplevel.fa -p 6 -L male,female -u Genome/ASU_Acar_v2.2.1.gtf allsamples.txt
+
+#Male vs. Female vs. Both
+./cuffdiff -use-sample-sheet -o Cuffdiff_out/mf_both -b Genome/Anolis_carolinensis.AnoCar2.0.dna_rm.toplevel.fa -p 6 -L male,female,both -u Genome/ASU_Acar_v2.2.1.gtf mf_both_samples.txt
+
+#--------------------------
+# 10. Separate indiviudal gene_exp.diff into individual comparisons 
+#--------------------------
+
+cat Cuffdiff_out/indv_diffout/gene_exp.diff | awk "$5 /d15/" | awk '{if ($6=="d26") print $2,$4,$5,$6,$8,$9,$13}' > Output_Data/Indv_Data/d15_d26.txt
+cat Cuffdiff_out/indv_diffout/gene_exp.diff | awk "$5 /d15/" | awk '{if ($6=="d47") print $2,$4,$5,$6,$8,$9,$13}' > Output_Data/Indv_Data/d15_d47.txt
+cat Cuffdiff_out/indv_diffout/gene_exp.diff | awk "$5 /d15/" | awk '{if ($6=="d61") print $2,$4,$5,$6,$8,$9,$13}' > Output_Data/Indv_Data/d15_d61.txt
+cat Cuffdiff_out/indv_diffout/gene_exp.diff | awk "$5 /d26/" | awk '{if ($6=="d47") print $2,$4,$5,$6,$8,$9,$13}' > Output_Data/Indv_Data/d26_d47.txt
+cat Cuffdiff_out/indv_diffout/gene_exp.diff | awk "$5 /d26/" | awk '{if ($6=="d61") print $2,$4,$5,$6,$8,$9,$13}' > Output_Data/Indv_Data/d26_d61.txt
+cat Cuffdiff_out/indv_diffout/gene_exp.diff | awk "$5 /d47/" | awk '{if ($6=="d61") print $2,$4,$5,$6,$8,$9,$13}' > Output_Data/Indv_Data/d47_d61.txt
+
+#--------------------------
+# 10. Combine gene_exp.diff with ASU_Acar_v2.2.1_orthologs_201408_v6.txt in order to link ASU gene IDs and Ensembl gene IDs
+#--------------------------
+
+#Male vs. Female:
+join --header --check-order -1 2 -2 1 'Cuffdiff_out/mf_diffout/gene_exp.diff' 'ASU_Acar_v2.2.1_orthologs_201408_v6.txt' > 'ensembl_gene_exp.txt'
+
+#Individual:
+join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/d15_d26.txt' 'ASU_Acar_v2.2.1_orthologs_201408_v6.txt' > 'Output_Data/Indv_Data/d15d26_ensembl_gene_exp.txt'
+join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/d15_d47.txt' 'ASU_Acar_v2.2.1_orthologs_201408_v6.txt' > 'Output_Data/Indv_Data/d15d47_ensembl_gene_exp.txt'
+join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/d15_d61.txt' 'ASU_Acar_v2.2.1_orthologs_201408_v6.txt' > 'Output_Data/Indv_Data/d15d61_ensembl_gene_exp.txt'
+join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/d26_d47.txt' 'ASU_Acar_v2.2.1_orthologs_201408_v6.txt' > 'Output_Data/Indv_Data/d26d47_ensembl_gene_exp.txt'
+join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/d26_d61.txt' 'ASU_Acar_v2.2.1_orthologs_201408_v6.txt' > 'Output_Data/Indv_Data/d26d61_ensembl_gene_exp.txt'
+join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/d47_d61.txt' 'ASU_Acar_v2.2.1_orthologs_201408_v6.txt' > 'Output_Data/Indv_Data/d47d61_ensembl_gene_exp.txt'
+
+#Pull out only relevent data:
+cat Output_Data/Indv_Data/d15d26_ensembl_gene_exp.txt | awk '{print $1,$11,$13,$2,$3,$4,$5,$6,$7}' > Output_Data/Indv_Data/D15_D26.txt
+cat Output_Data/Indv_Data/d15d47_ensembl_gene_exp.txt | awk '{print $1,$11,$13,$2,$3,$4,$5,$6,$7}' > Output_Data/Indv_Data/D15_D47.txt
+cat Output_Data/Indv_Data/d15d61_ensembl_gene_exp.txt | awk '{print $1,$11,$13,$2,$3,$4,$5,$6,$7}' > Output_Data/Indv_Data/D15_D61.txt
+cat Output_Data/Indv_Data/d26d47_ensembl_gene_exp.txt | awk '{print $1,$11,$13,$2,$3,$4,$5,$6,$7}' > Output_Data/Indv_Data/D26_D47.txt
+cat Output_Data/Indv_Data/d26d61_ensembl_gene_exp.txt | awk '{print $1,$11,$13,$2,$3,$4,$5,$6,$7}' > Output_Data/Indv_Data/D26_D61.txt
+cat Output_Data/Indv_Data/d47d61_ensembl_gene_exp.txt | awk '{print $1,$11,$13,$2,$3,$4,$5,$6,$7}' > Output_Data/Indv_Data/D47_D61.txt
+
+#--------------------------
+# 11. Isolate data with q-values to identify differentially/non-differentially expressed genes
+#--------------------------
+
+#Isolate data with q-values less than/equal to 0.05 to identify differentially expressed genes
+cat ensembl_gene_exp.txt | awk '{if ($13<=0.05) print $0}' > ensembl_mf_diff_genes.txt
+
+#Isolate data with q-values greater than 0.05 to identify non-differentially expressed genes:
+cat ensembl_gene_exp.txt | awk '{if ($13>0.05) print $0}' > no_diff_genes.txt
+
+#--------------------------
+# 12. Create data files of differentially expressed genes to be used for down stream analysis 
+#--------------------------
+
+#Individual:
+cat Output_Data/Indv_Data/indv_ensembl_gene_exp.txt | awk '{print $1,$4,$18,$20,$8,$9,$13}' > 'Output_Data/Indv_Data/anole_gene_exp.txt'
+
+#Male vs. Female
+cat Output_Data/MF_Data/ensembl_mf_diff_genes.txt | awk '{if ($5=="male") print $1,$3,$4,$18,$20,$8,$9,$13}' > AnoleDiffGenes.txt
+
+** this should be made into a different/new step 
+#Open in Excel and copy and paste the alias column of each file into a text file. Submit to GOrilla or ther gene ontology site using chicken/human as a reference. Copy the ortholog column from the orthologs file and save it in a text file to submit and run as a backgound list for both submissions. Copy results and paste in a csv.
+
+#Separate into male/female biased genes:
+cat Output_Data/MF_Data/AnoleDiffGenes.txt | awk '{if ($7<="1") print $1,$2,$3,$4,$5,$6,$7,$8}' > Output_Data/MF_Data/DiffGenesFemale.csv
+cat Output_Data/MF_Data/AnoleDiffGenes.txt | awk '{if ($7>="1") print $1,$2,$3,$4,$5,$6,$7,$8}' > Output_Data/MF_Data/DiffGenesMale.csv
+
+#All Genes:
+cat Output_Data/MF_Data/mf_ensembl_gene_exp.txt | awk '{print $1,$4,$18,$20,$8,$9,$13}' > Output_Data/MF_Data/MF_Expression.txt
+
+#--------------------------
+# 12. Separate genes by chromosome and Remove chromosome number so it can later be plotted in R(remember to paste header back into each file):
+#--------------------------
+
+grep 1: 'Output_Data/MF_Data/MF_Expression.txt' > 'Output_Data/MF_Data/chr1_exp.txt'
+sed -i '/GL/d' 'Output_Data/MF_Data/chr1_exp.txt'
+sed -i '/AAWZ/d' 'Output_Data/MF_Data/chr1_exp.txt'
+sed -i 's/1://g' 'Output_Data/MF_Data/chr1_exp.txt'
+
+grep 2: 'Output_Data/MF_Data/MF_Expression.txt' > 'Output_Data/MF_Data/chr2_exp.txt'
+sed -i '/GL/d' 'Output_Data/MF_Data/chr2_exp.txt'
+sed -i '/AAWZ/d' 'Output_Data/MF_Data/chr2_exp.txt'
+sed -i 's/2://g' 'Output_Data/MF_Data/chr2_exp.txt'
+
+grep 3: 'Output_Data/MF_Data/MF_Expression.txt' > 'Output_Data/MF_Data/chr3_exp.txt'
+sed -i '/GL/d' 'Output_Data/MF_Data/chr3_exp.txt'
+sed -i '/AAWZ/d' 'Output_Data/MF_Data/chr3_exp.txt'
+sed -i 's/3://g' 'Output_Data/MF_Data/chr3_exp.txt'
+
+grep 4: 'Output_Data/MF_Data/MF_Expression.txt' > 'Output_Data/MF_Data/chr4_exp.txt'
+sed -i '/GL/d' 'Output_Data/MF_Data/chr4_exp.txt'
+sed -i '/AAWZ/d' 'Output_Data/MF_Data/chr4_exp.txt'
+sed -i 's/4://g' 'Output_Data/MF_Data/chr4_exp.txt'
+
+grep 5: 'Output_Data/MF_Data/MF_Expression.txt' > 'Output_Data/MF_Data/chr5_exp.txt'
+sed -i '/GL/d' 'Output_Data/MF_Data/chr5_exp.txt'
+sed -i '/AAWZ/d' 'Output_Data/MF_Data/chr5_exp.txt'
+sed -i 's/5://g' 'Output_Data/MF_Data/chr5_exp.txt'
+
+grep 6: 'Output_Data/MF_Data/MF_Expression.txt' > 'Output_Data/MF_Data/chr6_exp.txt'
+sed -i '/GL/d' 'Output_Data/MF_Data/chr6_exp.txt'
+sed -i '/AAWZ/d' 'Output_Data/MF_Data/chr6_exp.txt'
+sed -i 's/6://g' 'Output_Data/MF_Data/chr6_exp.txt'
+
+**** What are these?? and what are they for?
+grep GL '/home/yitzhak/Documents/Squamates/Output_Data/MF_Data/MF_Expression.txt' > '/home/yitzhak/Documents/Squamates/Output_Data/MF_Data/GL_exp.txt'
+grep AAWZ '/home/yitzhak/Documents/Squamates/Output_Data/MF_Data/MF_Expression.txt' > '/home/yitzhak/Documents/Squamates/Output_Data/MF_Data/AAWZ_exp.txt'
+
+#--------------------------
+# 13. ***Needs more explaining 
+#--------------------------
+
+#In a text editor, search for a dash(-) followed by each of the numbers 1-9 and replace with tabs(\t) to separate locus start and end and change the header label to include the new column. 
+Open the files in Excel and insert a new column after column G and enter =F2/G2 in cell H2. 
+Drag the selector down for all rows to obtain the relative expression for each gene. 
+Copy this column then paste it the same place using the Paste Only Numbers option to remove the formula crom the cells.
+
+#--------------------------
+# 14. Relative expression for individual samples
+#--------------------------
+
+#Remove microchromosome genes to allow for a simpler analysis of chromosomes 1-6:
+
+sed -i '/GL/d' 'Output_Data/Indv_Data/D15_D26.txt'
+sed -i '/AAWZ/d' 'Output_Data/Indv_Data/D15_D26.txt'
+sed -i '/LG/d' 'Output_Data/Indv_Data/D15_D26.txt'
+cat Output_Data/Indv_Data/D15_D26.txt | awk '{gsub("-","\t",$4); print}' > Output_Data/Indv_Data/D15D26.txt
+
+sed -i '/GL/d' 'Output_Data/Indv_Data/D15_D47.txt'
+sed -i '/AAWZ/d' 'Output_Data/Indv_Data/D15_D47.txt'
+sed -i '/LG/d' 'Output_Data/Indv_Data/D15_D47.txt'
+cat Output_Data/Indv_Data/D15_D47.txt | awk '{gsub("-","\t",$4); print}' > Output_Data/Indv_Data/D15D47.txt
+
+sed -i '/GL/d' 'Output_Data/Indv_Data/D15_D61.txt'
+sed -i '/AAWZ/d' 'Output_Data/Indv_Data/D15_D61.txt'
+sed -i '/LG/d' 'Output_Data/Indv_Data/D15_D61.txt'
+cat Output_Data/Indv_Data/D15_D61.txt | awk '{gsub("-","\t",$4); print}' > Output_Data/Indv_Data/D15D61.txt
+
+sed -i '/GL/d' 'Output_Data/Indv_Data/D26_D47.txt'
+sed -i '/AAWZ/d' 'Output_Data/Indv_Data/D26_D47.txt'
+sed -i '/LG/d' 'Output_Data/Indv_Data/D26_D47.txt'
+cat Output_Data/Indv_Data/D26_D47.txt | awk '{gsub("-","\t",$4); print}' > Output_Data/Indv_Data/D26D47.txt
+
+sed -i '/GL/d' 'Output_Data/Indv_Data/D26_D61.txt'
+sed -i '/AAWZ/d' 'Output_Data/Indv_Data/D26_D61.txt'
+sed -i '/LG/d' 'Output_Data/Indv_Data/D26_D61.txt'
+cat Output_Data/Indv_Data/D26_D61.txt | awk '{gsub("-","\t",$4); print}' > Output_Data/Indv_Data/D26D61.txt
+
+sed -i '/GL/d' 'Output_Data/Indv_Data/D47_D61.txt'
+sed -i '/AAWZ/d' 'Output_Data/Indv_Data/D47_D61.txt'
+sed -i '/LG/d' 'Output_Data/Indv_Data/D47_D61.txt'
+cat Output_Data/Indv_Data/D47_D61.txt | awk '{gsub("-","\t",$4); print}' > Output_Data/Indv_Data/D47D61.txt
+
+#--------------------------
+# 15. ***Needs more explaining 
+#--------------------------
+#The locus information has to be separated in order to allow analysis in Excel or R. I
+In a text editor, search separately for the numbers 1-6 followed by a colon (e.g. 1:) and replace with that number followed by a tab (e.g. 1\t). 
+Change headers to include chr(chromosome), change locus to locus_start, and add locus_end. In Excel, insert a new column after cloumn J, type in "=I2/J2" an dhit enter. 
+Drag the selector down for every row to calculate the relative expressions for each gene. 
+Copy the whole column, and then paste it back in the same place using the paste only numbers option to remove the equation from the cells and leave only the values.
+
+#--------------------------
+# 16. Isolate genes with 50% or lower expression for male and female comparison
+#--------------------------
+
+#Remove microchromosome genes to allow for a simpler analysis of chromosomes 1-6:
+
+sed -i '/GL/d' '/home/yitzhak/Documents/Squamates/Output_Data/MF_Data/MF_Expression_2.txt'
+sed -i '/AAWZ/d' 'Output_Data/MF_Data/MF_Expression_2.txt'
+sed -i '/LG/d' 'Output_Data/MF_Data/MF_Expression_2.txt'
+cat Output_Data/MF_Data/MF_Expression_2.txt | awk '{gsub("-","\t",$2); print}' > Output_Data/MF_Data/MF_Exp.txt
+
+#Repeat the above process for separating chromosome numbers and calculating relative expression. Save as a .csv file, open in a text editor, replace commas with tabs, and change the file extension to .txt (awk did not work on a csv file).
+
+cat Output_Data/MF_Data/MF_RelEx.txt | awk '{if ($9<=0.5) print}' > Output_Data/MF_Data/Under50_Exp.txt
+
+#--------------------------
+# 17. Compile X-chromosome data for each trial
+#--------------------------
+
+#Copy exiting spreadsheat for male-female expression, make sure the header contains no spaces, and save as a csv. Open in a text editor and replace the commas with tabs. Change the file extension to txt.
+
+join --header --check-order -1 2 -2 1 'Output_Data/Indv_Data/XChr.txt' 'Output_Data/Indv_Data/d15_d26.txt' > 'Output_Data/Indv_Data/x_d15d26.txt'
+join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/x_d15d26.txt' 'Output_Data/Indv_Data/d15_d47.txt' > 'Output_Data/Indv_Data/x_d15d47.txt'
+join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/x_d15d47.txt' 'Output_Data/Indv_Data/d15_d61.txt' > 'Output_Data/Indv_Data/x_d15d61.txt'
+join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/x_d15d61.txt' 'Output_Data/Indv_Data/d26_d47.txt' > 'Output_Data/Indv_Data/x_d26d47.txt'
+join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/x_d26d47.txt' 'Output_Data/Indv_Data/d26_d61.txt' > 'Output_Data/Indv_Data/x_d26d61.txt'
+join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/x_d26d61.txt' 'Output_Data/Indv_Data/d47_d61.txt' > 'Output_Data/Indv_Data/x_d47d61.txt'
+
+#Delete unnecessary columns:
+cat Output_Data/Indv_Data/x_d47d61.txt | awk '{print $1,$2,$3,$4,$5,$6,$10,$11,$12,$16,$17,$18,$22,$23,$24,$28,$29,$30,$34,$35,$36,$40,$41,$42}' > 'Output_Data/Complete_Chr_X.txt'
+
+#Follow previous procedures for calculating relative expression.
+*** Needs better explaining and/or more the order of steps 
+
+
+#--------------------------
+# 18. Copy list of Ensembl IDs from AnoleDiffGenes.txt to submit for gene ontology
+#--------------------------
+
+*** Needs more explaining, what's gene ontology? how do I get there?
+cat Output_Data/MF_Data/AnoleDiffGenes.txt | awk '{print $4}' > Output_Data/MF_Data/DiffGene_ID_List.txt
+
+#--------------------------
+# 19. Isolate genes with no expression in males/females
+#--------------------------
+
+***This probably should be elsewhere in the readme, maybe after isolating genes with 50 ext. 
+*** Please explain why they are backwards for female and male
+
+#Females:
+cat Output_Data/MF_Data/MF_Expression.txt | awk '{if ($6=="0") print $1,$2,$3,$4,$5,$6,$7}' > Output_Data/MF_Data/No_Exp_Female.txt 
+cat Output_Data/MF_Data/No_Exp_Female.txt | awk '{if ($5!="0") print $1,$2,$3,$4,$5,$6,$7}' > Output_Data/MF_Data/Only_Male.txt 
+
+#Males:
+cat Output_Data/MF_Data/MF_Expression.txt | awk '{if ($5=="0") print $1,$2,$3,$4,$5,$6,$7}' > Output_Data/MF_Data/No_Exp_Male.txt 
+cat Output_Data/MF_Data/No_Exp_Male.txt | awk '{if ($6!="0") print $1,$2,$3,$4,$5,$6,$7}' > Output_Data/MF_Data/Only_Female.txt 
+
+#--------------------------
+# 20. Merge Hyp_ChrX.txt with orthologs and relative expression files (further editing done in Excel):
+#--------------------------
+
+join --header --check-order -1 1 -2 2 'Output_Data/Hyp_ChrX.txt' 'Output_Data/ASU_ENS.txt' > 'Output_Data/hypX_ortho.txt'
+join --header --check-order -1 1 -2 1 'Output_Data/hypX_ortho2.txt' 'Cuffdiff_out/mf_diffout/gene_exp.diff' > 'Output_Data/hypX_relex.txt'
+
+#--------------------------
+# 21. Isolate FPRM values for males and females for normalization in R (search for "-" and ":" and replace with "\t" to expend the locus and change header accordingly):
+#--------------------------
+
+#search for "-" and ":" and replace with "\t" to expend the locus and change header accordingly
+cat 'Cuffdiff_out/mf_diffout/genes.fpkm_tracking' | awk '{print $1,$7,$10,$14}' > 'Output_Data/MF_Data/mf_FPKM.txt'
+
+#--------------------------
+# 22. Isolate FPPKM values for genes on the known and hypothetical X-chromosomes
+#--------------------------
+
+join --header --check-order -1 1 -2 1 'Output_Data/MF_Data/fpkm/mf_FPKM.txt' 'Output_Data/Complete_Chr_X.txt' > Output_Data/MF_Data/fpkm/Xfpkm.txt
+cat 'Output_Data/MF_Data/fpkm/Xfpkm.txt' | awk '{print $1,$2,$3,$4,$5,$6}' > 'Output_Data/MF_Data/fpkm/X_fpkm.txt'
+
+join --header --check-order -1 1 -2 1 'Output_Data/MF_Data/fpkm/mf_FPKM.txt' 'Output_Data/hypX_ortho2.txt' > Output_Data/MF_Data/fpkm/hypxfpkm.txt
+cat 'Output_Data/MF_Data/fpkm/hypxfpkm.txt' | awk '{print $1,$2,$3,$4,$5,$6}' > 'Output_Data/MF_Data/fpkm/HypXFPKM.txt'
+
+#--------------------------
+# 23. Create list of gene IDs for all genes not on macrochromosomes for gene ontology analysis
+#--------------------------
+
+cat 'Output_Data/MF_Data/NotMapped.txt' | awk '{print $2}' > Output_Data/MF_Data/NotMappedList.txt
+
+#--------------------------
+# 24. Combine x linked scaffolds with mf_genome_exp_ensID.txt (sorted by Ensembl ID in Excel) and remove extra columns
+#--------------------------
+
+join --header --check-order -1 1 -2 6 'Output_Data/XLinkedScaffolds.txt' 'Output_Data/MF_Data/transition_files/mf_genome_exp_ensID.txt' >'Output_Data/xscaffoldid.txt'
+
+#--------------------------
+# 24. Combine male specific scaffold file (sorted by ASU gene ID in Excel) with orthologs file to obtain ensembl IDs (delete exta columns in Excel):
+#--------------------------
+
+join --header --check-order -1 1 -2 1 'Output_Data/Transition Files/MaleScafRX.txt' 'ASU_Acar_v2.2.1_orthologs_201408_v6.txt' > 'Output_Data/MaleScafRX.Ens.csv'
+
+
