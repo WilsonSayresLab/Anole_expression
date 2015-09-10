@@ -1,7 +1,7 @@
 ###Make a line chart illustrating the alignment bewtween proposed X-chromosome and GG15###
 
 #----------
-#1. X starting positions by scaffold (in Mb): 
+#1. Chromosome X starting positions by scaffold (in Mb)(Obtained scaffold length from UCSC genome browser and divide by 1,000,000): 
 #----------
 
 #Divide the starting loci for the anole and chicken by 1,000,000 to obtain loci in Mb. Add the following to the anole locus start for each scaffold to obtain linear starting points. Each is a rounded value of the scaffold length added to the previous value (obtained from UCSC):
