@@ -128,8 +128,6 @@ tophat2  --no-coverage-search --segment-length 19 -G /Genome/ASU_Acar_v2.2.1.gtf
 # 7. Assemble expressed genes and transcripts for each sample TIMING ~ 1 day 
 #--------------------------
 
-*** Where did the clout files come from? example:A081S1_clout
-
 cufflinks -o clout/D015S1_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.1/accepted_hits.bam
 cufflinks -o clout/D015S2_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.2/accepted_hits.bam
 cufflinks -o clout/D015S3_clout tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.3/accepted_hits.bam
@@ -169,7 +167,9 @@ cuffmerge  -g Genome/ASU_Acar_v2.2.1.gtf -s Genome/Anolis_carolinensis.AnoCar2.0
 # 9. Identify differentially expressed genes and transcripts TIMING ~ 12 days
 #--------------------------
 
-# Run cuffdiff using the ASU annotation instead of merged.gtf *** Please explain 
+# We ran cuffdiff using the ASU we were provided with since these files were used in it's creation, so the 
+# previous steps had already been done. Alternatively, a gtf file from Ensembl could also be used instead 
+# of making your own with cuffmerge.
 
 # Comparison between all four individuals 
 ./cuffdiff -o diffout -b Genome/Anolis_carolinensis.AnoCar2.0.dna_rm.toplevel.fa -p 6 -L d15,d26,d47,d61 -u Genome/ASU_Acar_v2.2.1.gtf tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.1/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.2/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.3/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.4/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d15.5/accepted_hits.bam tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.1/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.2/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.3/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.4/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d26.5/accepted_hits.bam tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.1/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.2/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.3/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.4/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d47.5/accepted_hits.bam tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.1/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.2/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.3/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.4/accepted_hits.bam,tophat2.0.8_ASU_Acar2.2.1/tophat2-d61.5/accepted_hits.bam
@@ -281,18 +281,18 @@ sed -i '/GL/d' 'Output_Data/MF_Data/chr6_exp.txt'
 sed -i '/AAWZ/d' 'Output_Data/MF_Data/chr6_exp.txt'
 sed -i 's/6://g' 'Output_Data/MF_Data/chr6_exp.txt'
 
-**** What are these?? and what are they for?
-grep GL '/home/yitzhak/Documents/Squamates/Output_Data/MF_Data/MF_Expression.txt' > '/home/yitzhak/Documents/Squamates/Output_Data/MF_Data/GL_exp.txt'
-grep AAWZ '/home/yitzhak/Documents/Squamates/Output_Data/MF_Data/MF_Expression.txt' > '/home/yitzhak/Documents/Squamates/Output_Data/MF_Data/AAWZ_exp.txt'
-
 #--------------------------
-# 13. ***Needs more explaining 
+# 13. Parse output file and calculate relative expression values 
 #--------------------------
 
-#In a text editor, search for a dash(-) followed by each of the numbers 1-9 and replace with tabs(\t) to separate locus start and end and change the header label to include the new column. 
-Open the files in Excel and insert a new column after column G and enter =F2/G2 in cell H2. 
-Drag the selector down for all rows to obtain the relative expression for each gene. 
-Copy this column then paste it the same place using the Paste Only Numbers option to remove the formula crom the cells.
+# Open gene_exp.diff in Excel and use the text to columns funtion to separate the locus columns into separate 
+#  columns for scaffold/chromosome number, locus start, and locus end.
+
+# Iinsert a new column after column G and enter =F2/G2 in cell H2 to calculate relative expression.
+# Drag the selector down for all rows or double click on the box at the lower righthand corner of the selected cell
+#  to obtain the relative expression for each gene. 
+# Copy this column then paste it the same place using the Paste Only Numbers option to remove the formula from 
+#   the cells and replace with numbers.
 
 #--------------------------
 # 14. Relative expression for individual samples
@@ -331,16 +331,7 @@ sed -i '/LG/d' 'Output_Data/Indv_Data/D47_D61.txt'
 cat Output_Data/Indv_Data/D47_D61.txt | awk '{gsub("-","\t",$4); print}' > Output_Data/Indv_Data/D47D61.txt
 
 #--------------------------
-# 15. ***Needs more explaining 
-#--------------------------
-#The locus information has to be separated in order to allow analysis in Excel or R. I
-In a text editor, search separately for the numbers 1-6 followed by a colon (e.g. 1:) and replace with that number followed by a tab (e.g. 1\t). 
-Change headers to include chr(chromosome), change locus to locus_start, and add locus_end. In Excel, insert a new column after cloumn J, type in "=I2/J2" an dhit enter. 
-Drag the selector down for every row to calculate the relative expressions for each gene. 
-Copy the whole column, and then paste it back in the same place using the paste only numbers option to remove the equation from the cells and leave only the values.
-
-#--------------------------
-# 16. Isolate genes with 50% or lower expression for male and female comparison
+# 15. Isolate genes with 50% or lower expression for male and female comparison
 #--------------------------
 
 #Remove microchromosome genes to allow for a simpler analysis of chromosomes 1-6:
@@ -355,11 +346,13 @@ cat Output_Data/MF_Data/MF_Expression_2.txt | awk '{gsub("-","\t",$2); print}' >
 cat Output_Data/MF_Data/MF_RelEx.txt | awk '{if ($9<=0.5) print}' > Output_Data/MF_Data/Under50_Exp.txt
 
 #--------------------------
-# 17. Compile X-chromosome data for each trial
+# 16. Compile X-chromosome data for each trial
 #--------------------------
 
-#Copy exiting spreadsheat for male-female expression, make sure the header contains no spaces, and save as a csv. Open in a text editor and replace the commas with tabs. Change the file extension to txt.
+# Copy exiting spreadsheat for male-female expression, make sure the header contains no spaces, and save as a csv. 
+# Open in a text editor and replace the commas with tabs. Change the file extension to txt.
 
+# Join X chromosome data from male:female comparison with individual comparisons in sequence:
 join --header --check-order -1 2 -2 1 'Output_Data/Indv_Data/XChr.txt' 'Output_Data/Indv_Data/d15_d26.txt' > 'Output_Data/Indv_Data/x_d15d26.txt'
 join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/x_d15d26.txt' 'Output_Data/Indv_Data/d15_d47.txt' > 'Output_Data/Indv_Data/x_d15d47.txt'
 join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/x_d15d47.txt' 'Output_Data/Indv_Data/d15_d61.txt' > 'Output_Data/Indv_Data/x_d15d61.txt'
@@ -367,32 +360,28 @@ join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/x_d15d61.txt' 'Outp
 join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/x_d26d47.txt' 'Output_Data/Indv_Data/d26_d61.txt' > 'Output_Data/Indv_Data/x_d26d61.txt'
 join --header --check-order -1 1 -2 1 'Output_Data/Indv_Data/x_d26d61.txt' 'Output_Data/Indv_Data/d47_d61.txt' > 'Output_Data/Indv_Data/x_d47d61.txt'
 
-#Delete unnecessary columns:
+# Delete unnecessary columns:
 cat Output_Data/Indv_Data/x_d47d61.txt | awk '{print $1,$2,$3,$4,$5,$6,$10,$11,$12,$16,$17,$18,$22,$23,$24,$28,$29,$30,$34,$35,$36,$40,$41,$42}' > 'Output_Data/Complete_Chr_X.txt'
 
 #Follow previous procedures for calculating relative expression.
-*** Needs better explaining and/or more the order of steps 
-
 
 #--------------------------
 # 18. Copy list of Ensembl IDs from AnoleDiffGenes.txt to submit for gene ontology
 #--------------------------
 
-*** Needs more explaining, what's gene ontology? how do I get there?
 cat Output_Data/MF_Data/AnoleDiffGenes.txt | awk '{print $4}' > Output_Data/MF_Data/DiffGene_ID_List.txt
+
+# The output file was submitted to GoRilla to determine the function of differentially expressed genes.
 
 #--------------------------
 # 19. Isolate genes with no expression in males/females
 #--------------------------
-
-***This probably should be elsewhere in the readme, maybe after isolating genes with 50 ext. 
-*** Please explain why they are backwards for female and male
-
-#Females:
+# First isolate genes with no expression one sex, then isolate genes with no expression in the other to remove genes with no expression in either.
+#Males:
 cat Output_Data/MF_Data/MF_Expression.txt | awk '{if ($6=="0") print $1,$2,$3,$4,$5,$6,$7}' > Output_Data/MF_Data/No_Exp_Female.txt 
 cat Output_Data/MF_Data/No_Exp_Female.txt | awk '{if ($5!="0") print $1,$2,$3,$4,$5,$6,$7}' > Output_Data/MF_Data/Only_Male.txt 
 
-#Males:
+#Females:
 cat Output_Data/MF_Data/MF_Expression.txt | awk '{if ($5=="0") print $1,$2,$3,$4,$5,$6,$7}' > Output_Data/MF_Data/No_Exp_Male.txt 
 cat Output_Data/MF_Data/No_Exp_Male.txt | awk '{if ($6!="0") print $1,$2,$3,$4,$5,$6,$7}' > Output_Data/MF_Data/Only_Female.txt 
 
