@@ -49,6 +49,7 @@ PutativeX<-read.xls("PutativeX.xlsx",header=TRUE)
 #		 autosomes 1-6
 #		 Putative X
 #		 LGb
+#    X-Linked Scaffolds
 #		 Genome
 #--------------------------
 
@@ -65,6 +66,8 @@ auto<-c(chr1,chr2,chr3,chr4,chr5,chr6)
 chrx<- subset(completechrx, select=c(relative_expression))
 PutativeChrX<- subset(PutativeX, select=c(rel.exp))
 LGb<- subset(completechrx, Source=='Ensembl', select=c(relative_expression))
+scaffolds<-subset(chrx,source!="Alfoldi, et al.",select=c(rel.exp))
+  scaffolds<-na.omit(scaffolds)
 
 # Genome
 Genome<- subset(mfx, select=c(rel_exp))
@@ -149,6 +152,13 @@ mdLGb <- function(x,y) {return(median(sample(rxLGb, 56, replace=TRUE)))}
 medianLGb <- boot(data=LGb$relative_expression,statistic=mdLGb, R=10000)
 ci1 <- boot.ci(medianLGb, conf=0.95, type="norm")
 ci1$norm
+
+# X-Linked Scaffolds
+median(scaffolds$rel.exp)
+mdscaf<-function(x,y) {return(median(sample(scaffolds$rel.exp, 300, replace=TRUE)))}
+medianscaf <- boot(data=scaffolds$rel.exp,statistic=mdscaf, R=1000)
+cimdscaf <- boot.ci(medianscaf, conf=0.95, type="norm")
+cimdscaf$norm
 
 # whole geome
 median(Genome)
