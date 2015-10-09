@@ -36,3 +36,17 @@ plot(locusscaf, scaffolds$rel.exp, pch=20, col='green4', main="Proposed X-Chromo
 	segments(-2,0.8715495,14,0.8715495,lwd=2,col="green4")
 	segments(-2,0.9722797,14,0.9722797,lwd=2,col="blue3")
 	segments(-2,1.014611,14,1.014611,lwd=2,lty=3,col="firebrick4")
+	segments(1.8,0,1.8,2,lwd=1,lty=3)
+	segments(2.9,0,2.9,2,lwd=1,lty=3)
+	segments(6.2,0,6.2,2,lwd=1,lty=3)
+	segments(6.8,0,6.8,2,lwd=1,lty=3)
+	segments(7.7,0,7.7,2,lwd=1,lty=3)
+	segments(7.9,0,7.9,2,lwd=1,lty=3)
+	segments(8.1,0,8.1,2,lwd=1,lty=3)
+	segments(9.4,0,9.4,2,lwd=1,lty=3)
+
+
+#-----------------
+# 4. Add scaffold names, title (Proposed X-Chromosome), x-axis (Positions on Anole Scaffolds), and y-axis (Relative Exression (M/F)) labels in GIMP. This will allow you to 
+# control the font size.
+#-----------------
