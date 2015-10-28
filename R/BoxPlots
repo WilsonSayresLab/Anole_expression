@@ -1,0 +1,25 @@
+##########################################################################################################################
+# Overview
+#
+# These are instructins for making boxplots of relative expression levels in on the proposed anole X chromosome.
+# 
+#  Required programs		R
+##########################################################################################################################
+
+#--------------------
+# 1. Import data for X chromosome and subset:
+#--------------------
+
+chrx<-read.csv("/home/yitzhak/Dropbox/Squamates/Rupp_lab_notes/Output_Data/PropX2.1RX.csv",header=TRUE)
+
+rx<-chrx$RelativeExpression
+scaf<-chrx$Scaffold
+
+#--------------------
+# 2. Create boxplot:
+#--------------------
+
+par(mar=c(5.1,5.1,4.1,2.1))
+boxplot(rx~scaf,ylab="Relative Expression (M/F)",ylim=c(0,3),xlab="Scaffold",cex.lab=1.5,
+        col=c("green4","green4","green4","green4","green4","green4","green4","green4","blue3"))
+  segments(0,1.028,10,1.028,col="firebrick4",lwd=2)
