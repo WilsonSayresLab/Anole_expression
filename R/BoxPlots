@@ -12,9 +12,6 @@
 
 chrx<-read.csv("/home/yitzhak/Dropbox/Squamates/Rupp_lab_notes/Output_Data/PropX2.1RX.csv",header=TRUE)
 
-rx<-chrx$RelativeExpression
-scaf<-chrx$Scaffold
-
 #--------------------
 # 2. Create boxplot:
 #--------------------
