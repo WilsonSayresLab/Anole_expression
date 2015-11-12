@@ -1,0 +1,61 @@
+###############################################################
+#-------------- OverView ----------------
+#
+#  Anole genome relative expression cubic spline normalization
+#
+#	Required Programs:	R
+#				DESeq2
+#
+#############################################################
+
+#--------------------------
+#1. Import autosomal data into R (delete duplicate row: ASU_Acar_G.22984). Remove n/a values and store as a matrix of integers so it can be read into DESeq:
+# (We exclude genes which are not on autosomes since they may be xex-linked.)
+#--------------------------
+
+	auto<-read.csv("mf_autosome_exp.csv",header=TRUE,row.names=1)
+	auto<-as.matrix(auto)
+	auto<-na.omit(auto)
+	storage.mode(auto)<-"integer"
+
+# Import meta-data for DESeq:
+	coldata<-read.table("coldata.txt",header=TRUE,row.names=1)
+
+#--------------------------
+#2. Create DESeq data set and run DESeq:
+#--------------------------
+
+	autosome<-DESeqDataSetFromMatrix(countData=auto,colData=coldata,design=~condition)
+	dds<-DESeq(autosome)
+	res<-results(dds)
+
+# Plot results for a preliminary examination of the data:
+	plotMA(dds, main="DESeq2", ylim=c(-2,2))
+	plotMA(res, main="DESeq2", ylim=c(-2,2))
+
+#--------------------------
+#3. Perform Variance Stabalizing Transformation on autosomal data:
+#--------------------------
+
+	nds<-varianceStabilizingTransformation(dds)
+
+#Convert data into matrix for later use:
+	Nds<-assay(nds)
+
+#--------------------------
+#4. Make a cubic spline model (read autosomal data back in without the as.interger function to get decimal values of the reads):
+#--------------------------
+
+	spl<-smooth.spline(Nds,y=DDS,df=1,all.knots=TRUE)
+
+#Fit auto into model to check:
+	aspl<-predict(spl,auto)
+
+# Wrtie results to file to back up normalized values:
+	write.table(aspl$y, file="auto_spline.csv",row.names=TRUE)
+
+#Fit whole gemone data to model:
+
+	MFX<-read,csv("mf_genome_exp.csv",header=TRUE,row.names=1)
+
+	gspl<-predict(spl,MFX$value_1)
