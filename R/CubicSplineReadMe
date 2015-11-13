@@ -39,8 +39,9 @@
 
 	nds<-varianceStabilizingTransformation(dds)
 
-#Convert data into matrix for later use:
+# Assay data for later use:
 	Nds<-assay(nds)
+	DDS<-assay(dds)
 
 #--------------------------
 #4. Make a cubic spline model (read autosomal data back in without the as.interger function to get decimal values of the reads):
@@ -56,6 +57,8 @@
 
 #Fit whole gemone data to model:
 
-	MFX<-read,csv("mf_genome_exp.csv",header=TRUE,row.names=1)
+	mfx<-read.csv("/home/yitzhak/Documents/Squamates/Output_Data/MF_Data/mf_genome_exp.csv",header=TRUE,row.names=1)
+	mfx<-na.omit(mfx)
+	MFX<-as.matrix(mfx)
 
 	gspl<-predict(spl,MFX$value_1)
